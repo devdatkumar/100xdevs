@@ -6,7 +6,10 @@
 */
 
 function countVowels(str) {
-  return str.toLowerCase().split("").match("aeiou");
+  return str
+    .toLowerCase()
+    .split("")
+    .filter((char) => "aeiou".includes(char)).length;
 }
 
 module.exports = countVowels;

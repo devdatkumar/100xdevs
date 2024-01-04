@@ -49,112 +49,49 @@ class Calculator {
   }
 
   calculate(str) {
-    str
-      .replace(" ", "")
-      .split("")
-      .filter((char) => {
-        let charCode = char.charCodeAt(0);
-        return (
-          !(charCode >= 65 && charCode <= 90) &&
-          !(charCode >= 97 && charCode <= 122) &&
-          char !== " "
-        );
-      })
-      .join("");
-
-    let infixStk = this.removeSpaces(str);
-    let postfixStk = this.infixToPostFix(infixStk);
-    this.result = this.resolvePostfixStk(postfixStk);
-  }
-
-  infixToPostFix(str) {
-    const stk = [];
-    let postfixStr = [];
+    let parantheses = 0;
+    let found = false;
+    let cleanString = "";
+    str = str.replaceAll(" ", "");
     for (let i = 0; i < str.length; i++) {
-      // if we have encountered a number in our infix stack, we will push to postfix stack as it is.
-      if (typeof str[i] === "number") postfixStr.push(str[i]);
-      // if we have encountered an opening parenthesis, we will push to temporary stack.
-      else if (str[i] === "(") stk.push("(");
-      // if we have encountered a closing parenthesis, we will pop out elements from temp stack and push it to postfix stack until opening parenthesis is at the top of temp stack and then remove that opening parenthesis at the end as well.
-      else if (str[i] === ")") {
-        while (stk[stk.length - 1] !== "(") {
-          postfixStr.push(stk.pop());
-        }
-        stk.pop();
-      }
-      // if we haven't encountered numbers or parenthesis, it means that we have encountered operators
-      else {
-        // if we do not have any element inside temp stack we will push the operator to temp stack.
-        if (stk.length === 0) stk.push(str[i]);
-        else {
-          // until temp stack is not empty and top of the temp stack is not an opening parenthesis we will loop,
-          while (stk.length !== 0 && stk[stk.length - 1] !== "(") {
-            // if operator is subtract or addition we will simply pop out value from temp stack and push them to postfix stack until loop breaks.
-            if (str[i] === "-" || str[i] === "+") {
-              postfixStr.push(stk.pop());
-            }
+      if (
+        str[i] >= 0 ||
+        str[i] <= 9 ||
+        str[i] == "/" ||
+        str[i] == "*" ||
+        str[i] == "+" ||
+        str[i] == "-" ||
+        str[i] == "(" ||
+        str[i] == ")" ||
+        str[i] == "."
+      ) {
+        let parenthesesCount = 0;
 
-            // if operator is multiply or divide, we will pop only if top of temp stack is multiply otherwise we will break the loop.
-            else if (str[i] === "*" || str[i] === "/") {
-              if (stk[stk.length - 1] === "*" || stk[stk.length - 1] === "/") {
-                postfixStr.push(stk.pop());
-              } else {
-                break;
-              }
+        for (let i = 0; i < str.length; i++) {
+          if (str[i] === "(") {
+            parenthesesCount++;
+          } else if (str[i] === ")") {
+            parenthesesCount--;
+
+            if (parenthesesCount < 0) {
+              throw new Error();
             }
           }
-
-          // we will push current operator in temp stack
-          stk.push(str[i]);
         }
+
+        if (parenthesesCount !== 0) {
+          throw new Error();
+        }
+        cleanString += str[i];
+      } else {
+        throw new Error();
       }
     }
 
-    // if our temp stack is not empty by the end of our loop, we will pop it out till it is empty and push them into postfix stack.
-    while (stk.length !== 0) postfixStr.push(stk.pop());
-    console.log(postfixStr);
+    str = cleanString;
+    console.log("cleanString", str);
 
-    // we will return postfix stack
-    return postfixStr;
-  }
-
-  resolvePostfixStk(postfixStk) {
-    let stk = [];
-
-    // we will loop through the postfix stack
-    for (let i = 0; i < postfixStk.length; i++) {
-      // if we encounter a number, we will it to our new temp stack.
-      if (typeof postfixStk[i] === "number") {
-        stk.push(postfixStk[i]);
-      }
-
-      // otherwise, it means that we have encountered an operator.
-      else {
-        // we will removed last elements from temp stack
-        let secondNumber = stk.pop();
-        let firstNumber = stk.pop();
-
-        // we will perform operator based on the operator encountered and push the result to temp stack again.
-        switch (postfixStk[i]) {
-          case "+":
-            stk.push(firstNumber + secondNumber);
-            break;
-          case "-":
-            stk.push(firstNumber - secondNumber);
-            break;
-          case "*":
-            stk.push(firstNumber * secondNumber);
-            break;
-          case "/":
-            if (secondNumber === 0) throw new Error();
-            stk.push(firstNumber / secondNumber);
-            break;
-        }
-      }
-    }
-
-    // after looping, the top of the temp stack we will our required result.
-    return stk.pop();
+    //so far all the input string is fully santized for the calucation.
   }
 }
 
